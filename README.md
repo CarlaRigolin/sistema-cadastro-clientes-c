@@ -1,6 +1,5 @@
-# sistema-cadastro-clientes-c
-Sistema de cadastro de clientes desenvolvido em C utilizando lista estática.
-/*
+# Sistema de Cadastro de Clientes em C
+Projeto desenvolvido em C para gerenciamento de clientes utilizando lista estática.
 ---------------------------------------------------------
 SISTEMA DE CADASTRO DE CLIENTES
 Disciplina: Estrutura de Dados
