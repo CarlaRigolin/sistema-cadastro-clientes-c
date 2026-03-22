@@ -72,9 +72,7 @@ typedef struct
     char dt_nascimento[20]; // Data de nascimento
 } reg_clientes;
 
-// -----------------------------
 // Estrutura da lista de clientes
-// -----------------------------
 typedef struct
 {
     reg_clientes ficha[MAX]; // Vetor que armazena os clientes
@@ -82,9 +80,7 @@ typedef struct
     int fim;                 // Quantidade de clientes cadastrados
 } Lista;
 
-// -----------------------------
 // Função que posiciona o cursor na tela
-// -----------------------------
 void gotoxy(int x, int y)
 {
     COORD coord;
@@ -93,9 +89,7 @@ void gotoxy(int x, int y)
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-// -----------------------------
 // Função que desenha a interface do sistema
-// -----------------------------
 void tela()
 {
     int c, l;
@@ -153,9 +147,7 @@ void tela()
     printf("Prof: Rodney");
 }
 
-// -----------------------------
 // Função que exibe mensagens ao usuário
-// -----------------------------
 void mensagem(char texto[])
 {
     gotoxy(7, 23);
@@ -164,9 +156,7 @@ void mensagem(char texto[])
     printf("%s", texto);
 }
 
-// -----------------------------
 // Função que exibe o formulário de clientes
-// -----------------------------
 void tela_clientes()
 {
     gotoxy(10, 7);
@@ -191,9 +181,7 @@ void tela_clientes()
     printf("6 - Data Nascimento..:");
 }
 
-// -----------------------------
 // Função que busca um cliente pelo código
-// -----------------------------
 int pesquisa(Lista L, int cod)
 {
     int i;
@@ -210,9 +198,7 @@ int pesquisa(Lista L, int cod)
     return -1; // retorna -1 se não encontrar
 }
 
-// -----------------------------
 // Função para cadastrar cliente
-// -----------------------------
 void cadastra_cliente(Lista *L)
 {
 
@@ -324,9 +310,7 @@ void cadastra_cliente(Lista *L)
     } while (resp == 1);
 }
 
-// -----------------------------
 // Função que altera os dados de um cliente
-// -----------------------------
 void altera_cliente(Lista *L)
 {
     int codigo;
@@ -473,9 +457,7 @@ void altera_cliente(Lista *L)
     }
 }
 
-// -----------------------------
 // Função que consulta um cliente pelo código
-// -----------------------------
 void consulta_cliente(Lista L)
 {
     int codigo;
@@ -529,9 +511,8 @@ void consulta_cliente(Lista L)
         getch();
     }
 }
-// -----------------------------
+
 // Função que exclui um cliente da lista
-// -----------------------------
 void exclusao_cliente(Lista *L)
 {
 
@@ -604,9 +585,8 @@ void exclusao_cliente(Lista *L)
     // Pausa antes de retornar ao menu
     getch();
 }
-// -----------------------------
+
 // Função que ordena os clientes pelo código
-// -----------------------------
 void ordenar_clientes_cod(Lista *L)
 
 {
@@ -636,9 +616,7 @@ void ordenar_clientes_cod(Lista *L)
     }
 }
 
-// -----------------------------
 // Função que ordena os clientes pelo nome (ordem alfabética)
-// -----------------------------
 void ordenar_cliente_nome(Lista *L)
 {
 
@@ -667,9 +645,7 @@ void ordenar_cliente_nome(Lista *L)
     }
 }
 
-// -----------------------------
-// Função que lista todos os clientes cadastrados
-// -----------------------------
+// Função que lista todos os clientes cadastrados por codigo
 void listar_clientes_cod(Lista *L)
 {
     // Variável usada para percorrer a lista de clientes
@@ -713,6 +689,7 @@ void listar_clientes_cod(Lista *L)
     getch();
 }
 
+// Função que lista todos os clientes cadastrados por nome
 void listar_clientes_nome(Lista *L)
 {
     // Variável usada para percorrer a lista de clientes
@@ -756,7 +733,6 @@ void listar_clientes_nome(Lista *L)
     }
     getch();
 }
-
 
 // Função que exibe o menu de consultas
 // Permite buscar cliente ou listar ordenações
@@ -811,10 +787,8 @@ void menu_consulta(Lista *L)
 
     } while (opcao != 4);
 }
-// -----------------------------
-// Função que lê os dados do arquivo e carrega na lista
-// -----------------------------
 
+// Função que lê os dados do arquivo e carrega na lista
 void le_arquivo(Lista *L)
 {
     int i = 0;
