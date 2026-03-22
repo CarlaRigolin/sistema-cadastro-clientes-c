@@ -1,5 +1,4 @@
-# Sistema de Cadastro de Clientes em C
-Projeto desenvolvido em C para gerenciamento de clientes utilizando lista estática.
+/*
 ---------------------------------------------------------
 SISTEMA DE CADASTRO DE CLIENTES
 Disciplina: Estrutura de Dados
@@ -17,6 +16,10 @@ Funcionalidades implementadas:
 - Exclusão de clientes
 - Listagem de clientes
 - Ordenação automática por código
+Observações:
+- Os dados são armazenados em arquivo binário (clientes.dat)
+- O sistema utiliza ordenação simples (Bubble Sort adaptado)
+- Interface desenvolvida com posicionamento de cursor (gotoxy)
 
 Estrutura utilizada:
 Lista estática com capacidade máxima definida por MAX.
@@ -33,24 +36,38 @@ Data: 07/03/2026
 #include <string.h>
 #define MAX 10 // Capacidade da lista
 
-// -----------------------------
 // Função que remove o ENTER de uma string
-// -----------------------------
 void remover_enter(char *texto)
 {
     texto[strcspn(texto, "\n")] = '\0';
 }
 
-// -----------------------------
+// Função que formata CPF(000.000.000-00)
+void formatar_cpf(char *cpf)
+{
+    char temp[15];
+    sprintf(temp, "%.3s.%.3s.%.3s-%.2s",
+            cpf, cpf + 3, cpf + 6, cpf + 9);
+
+    strcpy(cpf, temp);
+}
+
+// Função que formata data de aniversario (dd/mm/aaaa)
+void formatar_data(char *data)
+{
+    char temp[20];
+    sprintf(temp, "%.2s/%.2s/%.4s",
+            data, data + 2, data + 4);
+    strcpy(data, temp);
+}
 // Estrutura que representa um cliente
-// -----------------------------
 typedef struct
 {
     int codigo;             // Identificador único do cliente
     char nome[50];          // Nome completo
     char endereco[50];      // Endereço
     char telefone[16];      // Telefone de contato
-    char cpf[15];           // CPF do cliente
+    char cpf[20];           // CPF do cliente
     char email[50];         // Email para contato
     char dt_nascimento[20]; // Data de nascimento
 } reg_clientes;
@@ -64,8 +81,6 @@ typedef struct
     int inicio;              // Posição inicial da lista
     int fim;                 // Quantidade de clientes cadastrados
 } Lista;
-void ordenar_clientes(Lista *L);
-void listar_clientes(Lista L);
 
 // -----------------------------
 // Função que posiciona o cursor na tela
@@ -235,7 +250,6 @@ void cadastra_cliente(Lista *L)
             // Se encontrar o código, informa ao usuário que já existe
             if (result != -1)
             {
-                gotoxy(7, 23);
                 mensagem("Codigo ja existe...");
                 getch();
             }
@@ -260,8 +274,9 @@ void cadastra_cliente(Lista *L)
 
         gotoxy(35, 15);
         fflush(stdin);
-        fgets(clie.cpf, 15, stdin);
+        fgets(clie.cpf, 20, stdin);
         remover_enter(clie.cpf);
+        formatar_cpf(clie.cpf);
 
         gotoxy(35, 17);
         fflush(stdin);
@@ -272,10 +287,11 @@ void cadastra_cliente(Lista *L)
         fflush(stdin);
         fgets(clie.dt_nascimento, 20, stdin);
         remover_enter(clie.dt_nascimento);
+        formatar_data(clie.dt_nascimento);
 
         // Pergunta ao usuário se deseja salvar os dados digitados
         gotoxy(7, 23);
-        printf("Deseja salvar os dados (1-Sim 2-Nao): ");
+        mensagem("Deseja salvar os dados (1-Sim 2-Nao): ");
         scanf("%d", &resp);
 
         // Se o usuário confirmar o cadastro
@@ -292,8 +308,9 @@ void cadastra_cliente(Lista *L)
             {
                 // Copia os dados da variável temporária para o vetor da lista
                 L->ficha[L->fim] = clie;
-                L->fim++;            // Incrementa a quantidade de clientes cadastrados
-                ordenar_clientes(L); // Ordena automaticamente os clientes por código
+                L->fim++; // Incrementa a quantidade de clientes cadastrados
+                ordenar_clientes_cod(L);
+                gravar(L);
                 mensagem("Cliente cadastrado com sucesso!");
                 getch();
             }
@@ -301,7 +318,7 @@ void cadastra_cliente(Lista *L)
 
         // Pergunta se o usuário deseja cadastrar outro cliente
         gotoxy(7, 23);
-        printf("Deseja continuar cadastro (1-Sim 2-Nao): ");
+        mensagem("Deseja continuar cadastro (1-Sim 2-Nao): ");
         scanf("%d", &resp);
 
     } while (resp == 1);
@@ -385,6 +402,10 @@ void altera_cliente(Lista *L)
                 fflush(stdin);
                 fgets(L->ficha[posicao].nome, 50, stdin);
                 remover_enter(L->ficha[posicao].nome);
+
+                mensagem("Dado alterado com sucesso!");
+                getch();
+                gravar(L);
                 break;
 
             case 2:
@@ -392,6 +413,10 @@ void altera_cliente(Lista *L)
                 fflush(stdin);
                 fgets(L->ficha[posicao].endereco, 50, stdin);
                 remover_enter(L->ficha[posicao].endereco);
+
+                mensagem("Dado alterado com sucesso!");
+                getch();
+                gravar(L);
                 break;
 
             case 3:
@@ -399,13 +424,22 @@ void altera_cliente(Lista *L)
                 fflush(stdin);
                 fgets(L->ficha[posicao].telefone, 16, stdin);
                 remover_enter(L->ficha[posicao].telefone);
+
+                mensagem("Dado alterado com sucesso!");
+                getch();
+                gravar(L);
                 break;
 
             case 4:
                 gotoxy(35, 15);
                 fflush(stdin);
-                fgets(L->ficha[posicao].cpf, 15, stdin);
+                fgets(L->ficha[posicao].cpf, 20, stdin);
                 remover_enter(L->ficha[posicao].cpf);
+                formatar_cpf(L->ficha[posicao].cpf);
+
+                mensagem("Dado alterado com sucesso!");
+                getch();
+                gravar(L);
                 break;
 
             case 5:
@@ -413,6 +447,10 @@ void altera_cliente(Lista *L)
                 fflush(stdin);
                 fgets(L->ficha[posicao].email, 50, stdin);
                 remover_enter(L->ficha[posicao].email);
+
+                mensagem("Dado alterado com sucesso!");
+                getch();
+                gravar(L);
                 break;
 
             case 6:
@@ -420,16 +458,17 @@ void altera_cliente(Lista *L)
                 fflush(stdin);
                 fgets(L->ficha[posicao].dt_nascimento, 20, stdin);
                 remover_enter(L->ficha[posicao].dt_nascimento);
+                formatar_data(L->ficha[posicao].dt_nascimento);
+
+                mensagem("Dado alterado com sucesso!");
+                getch();
+                gravar(L);
                 break;
                 // Caso o usuário digite uma opção inválida
             default:
-                gotoxy(10, 22);
-                printf("Opcao invalida!");
+
+                mensagem("Opcao invalida!");
             }
-            // Mensagem informando que o campo foi alterado
-            gotoxy(10, 23);
-            printf("Dado alterado com sucesso!");
-            getch();
         }
     }
 }
@@ -453,7 +492,6 @@ void consulta_cliente(Lista L)
     // Busca o cliente na lista através do código
     posicao = pesquisa(L, codigo);
 
-    // Verifica se o cliente não foi encontrado
     if (posicao == -1)
     {
         gotoxy(10, 10);
@@ -467,7 +505,6 @@ void consulta_cliente(Lista L)
         gotoxy(10, 6);
         printf("DADOS DO CLIENTE");
 
-        // Exibe todos os dados armazenados do cliente
         gotoxy(10, 8);
         printf("Codigo......: %d", L.ficha[posicao].codigo);
 
@@ -492,7 +529,6 @@ void consulta_cliente(Lista L)
         getch();
     }
 }
-
 // -----------------------------
 // Função que exclui um cliente da lista
 // -----------------------------
@@ -557,7 +593,7 @@ void exclusao_cliente(Lista *L)
             }
             // Diminui a quantidade de clientes da lista
             L->fim--;
-
+            gravar(L);
             mensagem("Cliente excluido com sucesso!!!");
         }
         else
@@ -568,54 +604,11 @@ void exclusao_cliente(Lista *L)
     // Pausa antes de retornar ao menu
     getch();
 }
-
-// -----------------------------
-// Função que lista todos os clientes cadastrados
-// -----------------------------
-void listar_clientes(Lista L)
-{
-    // Variável usada para percorrer a lista de clientes
-    int i;
-
-    tela();
-
-    gotoxy(30, 3);
-    printf("LISTA DE CLIENTES");
-
-    // Verifica se a lista está vazia
-    if (L.fim == 0)
-    {
-        gotoxy(10, 8);
-        printf("Nenhum cliente cadastrado!");
-    }
-    else
-    {
-        // Cabeçalho da tabela de clientes
-        gotoxy(5, 6);
-        printf("COD   NOME                 TELEFONE");
-
-        gotoxy(5, 7);
-        printf("---------------------------------------------");
-
-        // Percorre toda a lista de clientes cadastrados
-        for (i = 0; i < L.fim; i++)
-        {
-            // Exibe os dados do cliente atual
-            gotoxy(5, 8 + i);
-            printf("%-5d %-20s %-15s",
-                   L.ficha[i].codigo,    // Código do cliente
-                   L.ficha[i].nome,      // Nome do cliente
-                   L.ficha[i].telefone); // Telefone do cliente
-        }
-    }
-
-    getch();
-}
-
 // -----------------------------
 // Função que ordena os clientes pelo código
 // -----------------------------
-void ordenar_clientes(Lista *L)
+void ordenar_clientes_cod(Lista *L)
+
 {
     int i, j;          // Variável de controle dos loops
     reg_clientes temp; // Variável temporária usada para realizar a troca
@@ -644,8 +637,262 @@ void ordenar_clientes(Lista *L)
 }
 
 // -----------------------------
-// Função principal do sistema
+// Função que ordena os clientes pelo nome (ordem alfabética)
 // -----------------------------
+void ordenar_cliente_nome(Lista *L)
+{
+
+    int i, j;          // Variável que controla o loop
+    reg_clientes temp; // Variável temporária usada para realizar a troca
+
+    // Percorre toda a lista até o penúltimo elemento
+    for (i = 0; i < L->fim - 1; i++)
+    {
+        // Compara o elemento atual com todos os elementos seguintes
+        for (j = i + 1; j < L->fim; j++)
+        {
+            // strcmp > 0 significa que o nome atual vem depois do próximo
+            // ou seja, está fora da ordem alfabética
+            if (strcmp(L->ficha[i].nome, L->ficha[j].nome) > 0)
+            {
+                // Guarda temporariamente o cliente da posição i
+                temp = L->ficha[i];
+
+                // Move o cliente da posição j para posição i
+                L->ficha[i] = L->ficha[j];
+
+                L->ficha[j] = temp;
+            }
+        }
+    }
+}
+
+// -----------------------------
+// Função que lista todos os clientes cadastrados
+// -----------------------------
+void listar_clientes_cod(Lista *L)
+{
+    // Variável usada para percorrer a lista de clientes
+    int i;
+    ordenar_clientes_cod(L);
+    tela();
+
+    gotoxy(30, 3);
+    printf("LISTA DE CLIENTES POR CODIGO");
+
+    // Verifica se a lista está vazia
+    if (L->fim == 0)
+    {
+
+        mensagem("Nenhum cliente cadastrado!");
+        getch();
+        return;
+    }
+    else
+    {
+        // Cabeçalho da tabela de clientes
+        gotoxy(5, 6);
+        printf("COD   NOME                 CPF             TELEFONE     DATA NASCIMENTO");
+
+        gotoxy(5, 7);
+        printf("------------------------------------------------------------------------");
+    }
+
+    // Percorre toda a lista de clientes cadastrados
+    for (i = 0; i < L->fim; i++)
+    {
+        // Exibe os dados do cliente atual
+        gotoxy(5, 8 + i);
+        printf("%-5d %-20s %-15s %-12s %-15s",
+               L->ficha[i].codigo,
+               L->ficha[i].nome,
+               L->ficha[i].cpf,
+               L->ficha[i].telefone,
+               L->ficha[i].dt_nascimento);
+    }
+    getch();
+}
+
+void listar_clientes_nome(Lista *L)
+{
+    // Variável usada para percorrer a lista de clientes
+    int i;
+
+    ordenar_cliente_nome(L);
+    tela();
+
+    gotoxy(30, 3);
+    printf("LISTA DE CLIENTES POR NOME");
+
+    // Verifica se a lista está vazia
+    if (L->fim == 0)
+    {
+
+        mensagem("Nenhum cliente cadastrado!");
+        getch();
+        return;
+    }
+    else
+    {
+        // Cabeçalho da tabela de clientes
+        gotoxy(5, 6);
+        printf("NOME                 CPF             TELEFONE     DATA NASCIMENTO  COD     ");
+
+        gotoxy(5, 7);
+        printf("-----------------------------------------------------------------------");
+    }
+
+    // Percorre toda a lista de clientes cadastrados
+    for (i = 0; i < L->fim; i++)
+    {
+        // Exibe os dados do cliente atual
+        gotoxy(5, 8 + i);
+        printf("%-20s %-15s %-12s %-15s %-5d",
+               L->ficha[i].nome,
+               L->ficha[i].cpf,
+               L->ficha[i].telefone,
+               L->ficha[i].dt_nascimento,
+               L->ficha[i].codigo);
+    }
+    getch();
+}
+
+
+// Função que exibe o menu de consultas
+// Permite buscar cliente ou listar ordenações
+void menu_consulta(Lista *L)
+{
+    int opcao;
+
+    do
+    {
+        tela();
+
+        gotoxy(20, 03);
+        printf("MENU DE CONSULTA");
+
+        gotoxy(20, 10);
+        printf("1 - Cliente por codigo especifico");
+
+        gotoxy(20, 12);
+        printf("2 - Lista de clientes em Ordem Alfabetica");
+
+        gotoxy(20, 14);
+        printf("3 - Lista de clientes em Ordem de Codigo");
+
+        gotoxy(20, 16);
+        printf("4 - Retornar ao menu Principal");
+
+        gotoxy(07, 23);
+        printf("Digite uma opcao: ");
+        scanf("%d", &opcao);
+
+        switch (opcao)
+        {
+        case 1:
+            consulta_cliente(*L);
+            break;
+
+        case 2:
+            listar_clientes_nome(L);
+            break;
+
+        case 3:
+            listar_clientes_cod(L);
+            break;
+
+        case 4:
+            break;
+
+        default:
+            mensagem("Opcao invalida!");
+            getch();
+        }
+
+    } while (opcao != 4);
+}
+// -----------------------------
+// Função que lê os dados do arquivo e carrega na lista
+// -----------------------------
+
+void le_arquivo(Lista *L)
+{
+    int i = 0;
+    FILE *ptr;
+    char *filename = "clientes.dat";
+    char *modo_gravacao = "rb";
+
+    reg_clientes clie;
+
+    tela();
+    gotoxy(19, 03);
+    printf("CARREGA DADOS DO ARQUIVO PARA A LISTA");
+    // Tenta abrir o arquivo para leitura binária
+    ptr = fopen(filename, modo_gravacao);
+
+    // Verifica se o arquivo existe
+    if (ptr == NULL)
+    {
+        mensagem("Arquivo nao encontrado!");
+        getch();
+        return;
+    }
+    // Atualiza o total de clientes carregados
+    while (fread(&clie, sizeof(reg_clientes), 1, ptr) == 1 && i < MAX)
+    {
+        L->ficha[i] = clie;
+        i++;
+    }
+    // Atualiza o total de clientes carregados
+    L->fim = i;
+    fclose(ptr);
+    mensagem("Dados carregados com sucesso!");
+    getch();
+}
+
+// Função que grava os dados da lista no arquivo
+void gravar(Lista *L)
+{
+    int i;
+    FILE *ptr;
+    char *filename = "clientes.dat";
+    char *modo_gravacao = "wb";
+    reg_clientes clie;
+
+    tela();
+
+    mensagem("GRAVA DADOS DA LISTA NO ARQUIVO EM DISCO");
+
+    // Verifica se há dados na lista
+    if (L->fim == 0)
+    {
+        mensagem("LISTA VAZIA..");
+        getch();
+    }
+    // Verifica erro ao abrir arquivo
+    else if ((ptr = fopen(filename, modo_gravacao)) == NULL)
+    {
+        mensagem("ERRO AO ABRIR ARQUIVO!");
+        getch();
+    }
+    else
+    {
+        // Percorre a lista e grava cada cliente no arquivo
+        for (i = 0; i < L->fim; i++)
+        {
+            clie = L->ficha[i];
+            fwrite(&clie, sizeof(clie), 1, ptr);
+        }
+
+        fclose(ptr);
+
+        mensagem("DADOS GRAVADOS COM SUCESSO!");
+        getch();
+    }
+}
+
+// Função principal do sistema
+// Responsável pelo controle do menu e fluxo geral
 int main()
 {
     Lista L; // Cria a lista que armazenará todos os clientes
@@ -653,6 +900,7 @@ int main()
     // Inicializa a lista
     L.inicio = 0; // Posição inicial da lista
     L.fim = 0;    // Indica que ainda não há clientes cadastrados
+    le_arquivo(&L);
 
     int opcao; // Variável que armazenará a opção escolhida pelo usuário
 
@@ -681,16 +929,13 @@ int main()
         printf("2 - Alterar Cliente");
 
         gotoxy(30, 14);
-        printf("3 - Consultar Cliente");
+        printf("3 - Menu de Consultas");
 
         gotoxy(30, 16);
         printf("4 - Excluir Cliente");
 
         gotoxy(30, 18);
-        printf("5 - Listar Clientes");
-
-        gotoxy(30, 20);
-        printf("6 - Sair do Sistema");
+        printf("5 - Sair do Sistema");
 
         // Solicita que o usuário escolha uma opção
         gotoxy(7, 23);
@@ -712,23 +957,19 @@ int main()
 
             // Opção para consultar um cliente pelo codigo
         case 3:
-            consulta_cliente(L);
+            menu_consulta(&L);
             break;
             // Opção para excluir um cliente da lista
         case 4:
             exclusao_cliente(&L);
             break;
-            // Opção para listar todos os clientes cadastrados
-        case 5:
-            listar_clientes(L);
-            break;
 
             // Opção para encerrar o sistema
-        case 6:
+        case 5:
             break;
         }
 
-    } while (opcao != 6); // O menu continua até o usuário escolher sair
+    } while (opcao != 5); // O menu continua até o usuário escolher sair
 
     return 0; // Finaliza a execução do programa
 }
